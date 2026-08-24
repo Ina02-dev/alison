@@ -1,0 +1,70 @@
+workflows:
+  ios-testflight:
+    name: Alison → I'Dea Shop TestFlight
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+
+    # Emri i API key në Codemagic → Team integrations → Developer Portal
+    # Ndryshoje nëse te Codemagic e ke me emër tjetër.
+    integrations:
+      app_store_connect: Alison
+
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        # I njëjti bundle ID si I'Dea Shop (tashmë në TestFlight)
+        bundle_identifier: al.ideashop.app
+      vars:
+        BUNDLE_ID: al.ideashop.app
+        ASC_APP_ID: "6804282383"
+        XCODE_PROJECT: Alison/Alison.xcodeproj
+        XCODE_SCHEME: Alison
+      xcode: latest
+      cocoapods: default
+
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+          source: true
+        - pattern: master
+          include: true
+          source: true
+
+    scripts:
+      - name: Set up code signing profiles
+        script: |
+          xcode-project use-profiles
+
+      - name: Increment build number
+        script: |
+          cd Alison
+          LATEST=$(app-store-connect get-latest-testflight-build-number "$BUNDLE_ID" || echo 0)
+          NEW_BUILD=$((LATEST + 1))
+          echo "Using build number: $NEW_BUILD (I'Dea Shop / $BUNDLE_ID)"
+          agvtool new-version -all "$NEW_BUILD"
+
+      - name: Build signed IPA
+        script: |
+          xcode-project build-ipa \
+            --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+
+    publishing:
+      email:
+        recipients:
+          - $CM_BUILD_EMAIL
+        notify:
+          success: true
+          failure: true
+
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
