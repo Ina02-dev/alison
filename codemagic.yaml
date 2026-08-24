@@ -7,10 +7,8 @@ workflows:
       app_store_connect: Alison
     environment:
       ios_signing:
-        provisioning_profiles:
-          - alison
-        certificates:
-          - Alison1
+        distribution_type: app_store
+        bundle_identifier: al.alison.app
       vars:
         BUNDLE_ID: "al.alison.app"
         APP_STORE_APPLE_ID: 6804735818
