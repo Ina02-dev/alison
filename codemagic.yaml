@@ -1,6 +1,6 @@
 workflows:
   ios-testflight:
-    name: Alison to Idea Shop TestFlight
+    name: Alison TestFlight
     max_build_duration: 120
     instance_type: mac_mini_m2
     integrations:
@@ -8,10 +8,9 @@ workflows:
     environment:
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: al.ideashop.app
+        bundle_identifier: al.alison.app
       vars:
-        BUNDLE_ID: "al.ideashop.app"
-        APP_STORE_APPLE_ID: 6804282383
+        BUNDLE_ID: "al.alison.app"
         XCODE_PROJECT: "Alison/Alison.xcodeproj"
         XCODE_SCHEME: "Alison"
       xcode: latest
@@ -22,7 +21,7 @@ workflows:
       - name: Increment build number
         script: |
           cd "$CM_BUILD_DIR/Alison"
-          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-testflight-build-number "$BUNDLE_ID" || app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" || echo 0)
+          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-testflight-build-number "$BUNDLE_ID" || echo 0)
           agvtool new-version -all $(($LATEST_BUILD_NUMBER + 1))
       - name: Build ipa for distribution
         script: |

@@ -18,15 +18,12 @@ Native **iPhone-only** app: choose a ring, open the camera, and see it placed on
 4. Plug in an iPhone (hand pose needs a real device — Simulator is weak for camera/Vision)
 5. Run on device, allow Camera + Photos
 
-## TestFlight pa Xcode lokal (përkohësisht via I'Dea Shop)
+## TestFlight pa Xcode lokal
 
 Përdor **Codemagic**. Udhëzuesi: [`CODEMAGIC.md`](CODEMAGIC.md)
 
-- Bundle ID: `al.ideashop.app` (i njëjti me I'Dea Shop në TestFlight)
-- ASC App ID: `6804282383`
-- Workflow: **Alison → I'Dea Shop TestFlight**
-
-Kjo e ngarkon Alison si **build të ri** të I'Dea Shop — jo app i veçantë.
+- Bundle ID: `al.alison.app`
+- Workflow: **Alison TestFlight**
 
 ## In the try-on screen
 
