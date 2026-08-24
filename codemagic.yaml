@@ -20,7 +20,10 @@ workflows:
       cocoapods: default
     scripts:
       - name: Set up code signing settings on Xcode project
-        script: xcode-project use-profiles
+        script: |
+          xcode-project use-profiles \
+            --archive-method app-store \
+            --project "$CM_BUILD_DIR/$XCODE_PROJECT"
       - name: Increment build number
         script: |
           cd "$CM_BUILD_DIR/Alison"
