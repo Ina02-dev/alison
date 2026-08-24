@@ -8,9 +8,11 @@ workflows:
     environment:
       ios_signing:
         provisioning_profiles:
-          - app_store
+          - profile: app_store
+            environment_variable: APP_STORE_PROFILE_PATH
         certificates:
-          - Alison1
+          - certificate: Alison1
+            environment_variable: DISTRIBUTION_CERTIFICATE_PATH
       vars:
         BUNDLE_ID: "al.alison.app"
         APP_STORE_APPLE_ID: 6804735818
@@ -21,9 +23,13 @@ workflows:
     scripts:
       - name: Set up code signing settings on Xcode project
         script: |
+          echo "Profile path: $APP_STORE_PROFILE_PATH"
+          echo "Certificate path: $DISTRIBUTION_CERTIFICATE_PATH"
           xcode-project use-profiles \
             --archive-method app-store \
-            --project "$CM_BUILD_DIR/$XCODE_PROJECT"
+            --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            --profile "$APP_STORE_PROFILE_PATH" \
+            --code-signing-setup-verbose-logging
       - name: Increment build number
         script: |
           cd "$CM_BUILD_DIR/Alison"
