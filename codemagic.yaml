@@ -1,62 +1,38 @@
 workflows:
   ios-testflight:
-    name: Alison → I'Dea Shop TestFlight
-    max_build_duration: 60
+    name: Alison to Idea Shop TestFlight
+    max_build_duration: 120
     instance_type: mac_mini_m2
-
-    # Emri i API key në Codemagic → Team integrations → Developer Portal
-    # Ndryshoje nëse te Codemagic e ke me emër tjetër.
     integrations:
       app_store_connect: Alison
-
     environment:
       ios_signing:
         distribution_type: app_store
-        # I njëjti bundle ID si I'Dea Shop (tashmë në TestFlight)
         bundle_identifier: al.ideashop.app
       vars:
-        BUNDLE_ID: al.ideashop.app
-        ASC_APP_ID: "6804282383"
-        XCODE_PROJECT: Alison/Alison.xcodeproj
-        XCODE_SCHEME: Alison
+        BUNDLE_ID: "al.ideashop.app"
+        APP_STORE_APPLE_ID: 6804282383
+        XCODE_PROJECT: "Alison/Alison.xcodeproj"
+        XCODE_SCHEME: "Alison"
       xcode: latest
       cocoapods: default
-
-    triggering:
-      events:
-        - push
-      branch_patterns:
-        - pattern: main
-          include: true
-          source: true
-        - pattern: master
-          include: true
-          source: true
-
     scripts:
-      - name: Set up code signing profiles
-        script: |
-          xcode-project use-profiles
-
+      - name: Set up code signing settings on Xcode project
+        script: xcode-project use-profiles
       - name: Increment build number
         script: |
-          cd Alison
-          LATEST=$(app-store-connect get-latest-testflight-build-number "$BUNDLE_ID" || echo 0)
-          NEW_BUILD=$((LATEST + 1))
-          echo "Using build number: $NEW_BUILD (I'Dea Shop / $BUNDLE_ID)"
-          agvtool new-version -all "$NEW_BUILD"
-
-      - name: Build signed IPA
+          cd "$CM_BUILD_DIR/Alison"
+          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-testflight-build-number "$BUNDLE_ID" || app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" || echo 0)
+          agvtool new-version -all $(($LATEST_BUILD_NUMBER + 1))
+      - name: Build ipa for distribution
         script: |
           xcode-project build-ipa \
             --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
             --scheme "$XCODE_SCHEME"
-
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
       - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
-
     publishing:
       email:
         recipients:
@@ -64,7 +40,6 @@ workflows:
         notify:
           success: true
           failure: true
-
       app_store_connect:
         auth: integration
         submit_to_testflight: true
